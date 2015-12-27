@@ -20,7 +20,13 @@ int main()
 {
     Log("Audio controller starting");
     
-    // Begin qjackctl
+    FILE *jack = popen("qjackctl","w"); // Begin qjackctl (not yet working)
+    if ( jack == 0 ) {
+        fprintf( stderr, "Could not execute jack\n" );
+        return 1;
+	}
+    
+    
     Sleep(2);
     
     // Begin ecasound
@@ -49,7 +55,7 @@ void BeginRecording()
     // Create file name
     time_t t = time(NULL);
     tm* localTime = (localtime(&t));
-    char outputFile[4096]; // TODO : Replace this with platform-appropriate consts
+    char outputFile[4096]; // TODO : Replace this with platform-appropriate consts (-c -i jack,system -o outputFile.wav)
     sprintf(outputFile, "Out_%d-%d-%d_%d-%d-%d.wav", (1900 + localTime->tm_year), localTime->tm_mon, localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
     
         
