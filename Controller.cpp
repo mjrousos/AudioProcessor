@@ -12,6 +12,10 @@
 
 #include "Controller.h"
 
+#if !WINDOWS
+void Sleep(int seconds) { sleep(seconds); }
+#endif
+
 int main()
 {
     Log("Audio controller starting");
