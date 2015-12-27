@@ -1,0 +1,2 @@
+### Audio Processor
+This is just a working repo for a simple app that will launch several audio processing apps on a microcontroller at process start time and send inputs to the commands based on button presses.
