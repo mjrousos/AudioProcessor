@@ -13,7 +13,7 @@
 #include "Controller.h"
 
 #if !WINDOWS
-void Sleep(int seconds) { sleep(seconds); }
+void Sleep(double seconds) { sleep(seconds); }
 #endif
 
 int main()
