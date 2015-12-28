@@ -3,68 +3,122 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-
-#if WINDOWS
-#include <windows.h>
-#else
 #include <unistd.h>
-#endif
-
 #include "Controller.h"
-
-#if !WINDOWS
-void Sleep(double seconds) { sleep(seconds); }
-#endif
 
 int main()
 {
     Log("Audio controller starting");
     
-    // Begin qjackctl
-    Sleep(2);
+    StartJackCtl();
     
-    // Begin ecasound
-    Sleep(2);
+    if (0 != ArmRecording())
+    {
+        Log("ERROR: Arming failed");
+        return -1;
+    }
     
     KeepListening = true;
     
     Log("Ready!"); // TODO : Notify of readiness via GPIO
     
     // !! TEMPORARY TEST!
-    BeginRecording();
+    StartRecording();
+    sleep(3);
+    StopRecording();
     // !! TEMPORARY TEST!
     
     while (KeepListening)
     {
         // Listen for start/stop from the GPIO pins
-        Sleep(0.5); // Sleep some so that we're not thrashing in this loop
+        usleep(500000); // Sleep some so that we're not thrashing in this loop
+        
+        // TODO : TEMPORARY TEST
+        StopListening();
     }        
     
+    DisarmRecording();
+    EndJackCtl();
+    
     Log("Audio controller ending");
+    EndJackCtl();
+    
     return 0;
 }
 
-void BeginRecording()
+void StartJackCtl()
+{
+    sleep(2);
+}
+
+void EndJackCtl()
+{
+    // TODO
+}
+
+int ArmRecording()
 {
     // Create file name
     time_t t = time(NULL);
     tm* localTime = (localtime(&t));
-    char outputFile[4096]; // TODO : Replace this with platform-appropriate consts
+    char outputFile[PATH_MAX];
     sprintf(outputFile, "Out_%d-%d-%d_%d-%d-%d.wav", (1900 + localTime->tm_year), localTime->tm_mon, localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
-    
-        
-    Log("Recording to:");
+
+    // Assemble command line
+    char ecasoundCommandLine[PATH_MAX];
+    strcpy(ecasoundCommandLine, EcasoundCommandLineBase); // TODO : Guard against overruns
+    strcat(ecasoundCommandLine, outputFile); // TODO : Guard against overruns
+
+    // Begin ecasound
+    ecasoundStdIn = popen(ecasoundCommandLine, "w");
+    if (!ecasoundStdIn)
+    {
+        Log("ERROR starting ecasound");
+        return -1;
+    }
+    sleep(2);
+    Log("Recording armed");
+    Log("Output file set to:");
     Log(outputFile);
+    
+    return 0;
 }
 
-void EndRecording()
+void DisarmRecording()
 {
-    
+    if (ecasoundStdIn)
+    {
+        fprintf(ecasoundStdIn, "q\n");
+        fflush(ecasoundStdIn);
+        pclose(ecasoundStdIn);
+        Log("Recording disarmed");
+    }
+}
+
+void StartRecording()
+{
+    if (ecasoundStdIn)
+    {
+        fprintf(ecasoundStdIn, "t\n");
+        fflush(ecasoundStdIn);
+        Log("Recording started");
+    }
+}
+
+void StopRecording()
+{
+    if (ecasoundStdIn)
+    {
+        fprintf(ecasoundStdIn, "s\n");
+        fflush(ecasoundStdIn);
+        Log("Recording stopped");
+    }
 }
 
 void StopListening()
 {
     KeepListening = false;
+    Log("Stopped listening for triggers");
 }
 
 const int TIME_STR_LEN = 28;

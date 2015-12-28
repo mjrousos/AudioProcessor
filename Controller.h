@@ -1,6 +1,16 @@
-bool KeepListening;
+#include <stdio.h>
 
-void BeginRecording();
-void EndRecording();
-void EndListening();
+bool KeepListening;
+FILE* ecasoundStdIn;
+pid_t jackCtlPID;
+const char* QJackCtlCommandLine = "/usr/local/bin/qjackctl";
+const char* EcasoundCommandLineBase = "/usr/local/bin/ecasound -c -o:";
+
+void StartJackCtl();
+void EndJackCtl();
+int ArmRecording();
+void DisarmRecording();
+void StartRecording();
+void StopRecording();
+void StopListening();
 void Log(const char* msg);
