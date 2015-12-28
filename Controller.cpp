@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits.h>
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -52,13 +53,48 @@ int main()
 
 bool StartJackCtl()
 {
-    sleep(2);
-    return true;
+    pid_t pid = fork();
+    
+    if (pid == -1)
+    {
+        Log("ERROR: Could not fork process to create qjackctl");
+        return false;
+    }
+    else if (pid == 0)  // Child process
+    {
+        char* args[] = { (char*)QJackCtlCommandLine, (char*)0 };
+        execv(QJackCtlCommandLine, args);
+        
+        // execv never returns, so bail out with an error if it somehow does
+        Log("ERROR: Executing qjackctl failed");
+        _exit(127); 
+    }
+    else    // Parent process
+    {
+        // Brief pause to allow qjackctl to initialize
+        jackCtlPID = pid;
+        sleep(3);
+        Log("QJackCtl started");
+        return true;
+    }
 }
 
 bool EndJackCtl()
 {
-    // TODO
+    if (jackCtlPID)
+    {
+        // Attempt to kill politely first and only force shutdown if that fails
+        if (0 != kill(jackCtlPID, SIGTERM))
+        {
+            kill(jackCtlPID, SIGKILL);
+        }
+        jackCtlPID = 0;
+    }
+    else
+    {
+        Log("Warning: QJackCtl process not found");
+        return false;
+    }
     return true;
 }
 
