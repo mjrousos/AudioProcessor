@@ -4,7 +4,7 @@ bool KeepListening;
 FILE* ecasoundStdIn;
 pid_t jackCtlPID;
 const char* QJackCtlCommandLine = "/usr/local/bin/qjackctl";
-const char* EcasoundCommandLineBase = "/usr/local/bin/ecasound -c -o:";
+const char* EcasoundCommandLineBase = "/usr/local/bin/ecasound -c -i jack,system -o ";
 
 void StartJackCtl();
 void EndJackCtl();
