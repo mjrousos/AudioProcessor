@@ -102,6 +102,7 @@ bool DisarmRecording()
         fprintf(ecasoundStdIn, "q\n");
         fflush(ecasoundStdIn);
         pclose(ecasoundStdIn);
+        ecasoundStdIn = NULL;
         Log("Recording disarmed");
         return true;
     }
@@ -139,7 +140,7 @@ bool StopRecording()
     }
     else
     {
-        Log("Warning: Not recording");
+        Log("ERROR: Recording is not armed");
         return false;
     }
 }
@@ -156,5 +157,6 @@ void Log(const char* msg)
     time_t t = time(NULL);
     char* timeStr = asctime(localtime(&t));
     timeStr[strlen(timeStr) - 1] = '\0'; // asctime automatically  includes an unwanted new line; so get rid of it
-    printf("[%s] %s\n", timeStr, msg);
+    printf("\033[0;36m");
+    printf("[%s] %s\033[0m\n", timeStr, msg);
 }
