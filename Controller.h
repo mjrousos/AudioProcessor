@@ -14,3 +14,4 @@ bool StartRecording();
 bool StopRecording();
 void StopListening();
 void Log(const char* msg);
+void ShowUsage();

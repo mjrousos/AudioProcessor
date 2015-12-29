@@ -25,30 +25,58 @@ int main()
         return -1;
     }
     
-    // Arm recording on startup
+    // TODO : Initialize GPIO callbacks
+    
+    // Begin armed. If that is not desirable, remove this block
     if (!ArmRecording())
     {
         Log("ERROR: Arming failed");
         return -2;
     }
     
+    // Start listening for key presses
     KeepListening = true;
     
-    Log("Ready!"); // TODO : Notify of readiness via GPIO
-    
-    // !! TEMPORARY TEST!
-    StartRecording();
-    sleep(3);
-    StopRecording();
-    // !! TEMPORARY TEST!
+    Log("Ready!");
+    ShowUsage();
+    // TODO : Notify of readiness via GPIO
     
     while (KeepListening)
     {
-        // Listen for start/stop from the GPIO pins
-        usleep(500000); // Sleep some so that we're not thrashing in this loop
-        
-        // TODO : TEMPORARY TEST
-        StopListening();
+        // TODO : Find a way to wait on GPIO input (rather than (or in addition to) std/keyboard input)
+        switch (getchar())
+        {
+            // TODO : Do we want to check return values here for errors?
+            case 'a':
+            case 'A':
+                ArmRecording();
+                break;
+            case 'd':
+            case 'D':
+                DisarmRecording();
+                break;
+            case 't':
+            case 'T':
+                StartRecording();
+                break;
+            case 's':
+            case 'S':
+                StopRecording();
+                break;
+            case 'q':
+            case 'Q':
+                StopListening();
+                break;
+            case ' ':
+            case '\t':
+            case '\n':
+            case '\r':
+                // Ignore white space
+                break;
+            default:
+                ShowUsage();
+                break;
+        }
     }        
     
     DisarmRecording();
@@ -203,4 +231,14 @@ void Log(const char* msg)
     timeStr[strlen(timeStr) - 1] = '\0'; // asctime automatically  includes an unwanted new line; so get rid of it
     printf("\033[0;36m");
     printf("[%s] %s\033[0m\n", timeStr, msg);
+}
+
+void ShowUsage()
+{
+    printf("\033[0;35mUsage:\n");
+    printf("\ta: Arm recording\n");
+    printf("\td: Disarm recording and save file\n");
+    printf("\tt: Start recording\n");
+    printf("\ts: Stop recording\n");
+    printf("\tq: Quit\033[0m\n");
 }
