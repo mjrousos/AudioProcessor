@@ -1,3 +1,11 @@
+// Future work items (which probably aren't necessary to get things working initially):
+//  - Extract arm/disarm/start/stop functions into a (static) class so that they're easily called
+//    from other libraries.
+//  - Make arm/disarm/start/stop functions thread safe (by synchronizing on ecasoundStdIn) so that
+//    the functions can be used from multi-threaded code.
+//  - Switch from waiting on key presses to a more general event loop or event callback model (to be more
+//    like the GPIO input model).
+
 #include <iostream>
 #include <limits.h>
 #include <signal.h>
